@@ -1196,7 +1196,35 @@ func fixInfo(obj Object, info *ObjectInfo) Object {
 	}
 }
 
+func changeFirstSymbol(seq Seq, fqn string) {
+	list := seq.(*List)
+	list.first = MakeSymbol(fqn)
+}
+
+func replaceCustomMacroWithBuiltInIsomorphic(seq Seq, ctx *ParseContext) {
+	op := seq.First()
+	sym := op.(Symbol)
+	if sym.name == nil {
+		return
+	}
+	rsym, ok := ctx.GlobalEnv.Resolve(sym)
+	if !ok {
+		return
+	}
+
+	ns := *rsym.ns.Name.name
+	name := *rsym.name.name
+	switch ns {
+	case "taoensso.tufte":
+		switch name {
+		case "defnp":
+			changeFirstSymbol(seq, "joker.core/defn")
+		}
+	}
+}
+
 func macroexpand1(seq Seq, ctx *ParseContext) Object {
+	replaceCustomMacroWithBuiltInIsomorphic(seq, ctx)
 	op := seq.First()
 	vr := resolveMacro(op, ctx)
 	if vr != nil {
