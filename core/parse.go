@@ -1203,6 +1203,9 @@ func changeFirstSymbol(seq Seq, fqn string) {
 
 func replaceCustomMacroWithBuiltInIsomorphic(seq Seq, ctx *ParseContext) {
 	op := seq.First()
+	if op.GetType() != TYPE.Symbol {
+		return
+	}
 	sym := op.(Symbol)
 	if sym.name == nil {
 		return
